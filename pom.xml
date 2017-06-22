@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.example</groupId>
+    <artifactId>pipeline-branch-error</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <scm>
+        <developerConnection>scm:git:ssh://git@github.com/kenrachynski/pipeline-branch-error.git</developerConnection>
+    </scm>
+
+    <properties>
+        <maven.antrun.plugin.version>1.7</maven.antrun.plugin.version>
+        <maven.scm.plugin.version>1.9.5</maven.scm.plugin.version>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>${maven.antrun.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>01-set-version-release</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target name="set-version-release">
+                                <echo>Updating version and release date</echo>
+                                <tstamp>
+                                    <format property="releaseDate" pattern="yyyyMMdd-hhmm"/>
+                                </tstamp>
+                                <replaceregexp file="src/main/java/com/example/PipelineBranchError.java" match="public static String releaseDate(.*);" replace='public static String releaseDate = "${releaseDate}";' byline="true"/>
+                                <replaceregexp file="src/main/java/com/example/PipelineBranchError.java" match="public static String releaseVersion(.*);" replace='public static String releaseVersion = "${project.version}";' byline="true"/>
+                            </target>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>03-set-version-dev</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target name="set-version-dev">
+                                <echo>Updating version and release date</echo>
+                                <tstamp>
+                                    <format property="releaseDate" pattern="yyyyMMdd-hhmm"/>
+                                </tstamp>
+                                <replaceregexp file="src/main/java/com/example/PipelineBranchError.java" match="public static String releaseDate(.*);" replace='public static String releaseDate = "${releaseDate}";' byline="true"/>
+                                <replaceregexp file="src/main/java/com/example/PipelineBranchError.java" match="public static String releaseVersion(.*);" replace='public static String releaseVersion = "${project.version}-dev";' byline="true"/>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-scm-plugin</artifactId>
+                <version>${maven.scm.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>02-commit</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>checkin</goal>
+                        </goals>
+                        <configuration>
+                            <excludes>**</excludes>
+                            <includes>src/main/java/com/example/PipelineBranchError.java</includes>
+                            <message>Build updating version for release</message>
+                            <pushChanges>false</pushChanges>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>04-commit</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>checkin</goal>
+                        </goals>
+                        <configuration>
+                            <excludes>**</excludes>
+                            <includes>src/main/java/com/example/PipelineBranchError.java</includes>
+                            <message>Build updating version for development</message>
+                            <pushChanges>true</pushChanges>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>
